@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>我的雲端聯絡簿</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 900px; }
+        .card { background: white; border-radius: 12px; padding: 20px; shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #1a73e8; border-bottom: 2px solid #e8eaed; padding-bottom: 10px; }
+        
+        /* 列表樣式 */
+        ul { list-style: none; padding: 0; }
+        li { background: #fff9c4; margin-bottom: 8px; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); }
+        .event-item { background: #e3f2fd; border-left: 5px solid #2196f3; }
+        
+        /* 按鈕與輸入 */
+        .controls { margin-top: 15px; display: flex; gap: 5px; }
+        input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { cursor: pointer; border: none; border-radius: 4px; padding: 8px 12px; }
+        .add-btn { background: #34a853; color: white; }
+        .del-btn { background: #ff5252; color: white; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2>📒 聯絡簿注意事項</h2>
+        <ul id="memoList"></ul>
+        <div class="controls">
+            <input type="text" id="memoInput" placeholder="輸入提醒...">
+            <button class="add-btn" onclick="saveData('memo')">新增</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📅 今日重要大事</h2>
+        <ul id="eventList"></ul>
+        <div class="controls">
+            <input type="text" id="eventInput" placeholder="大事內容...">
+            <button class="add-btn" onclick="saveData('event')">新增</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 初始化讀取資料
+    document.addEventListener('DOMContentLoaded', () => {
+        render('memo');
+        render('event');
+    });
+
+    function saveData(type) {
+        const input = document.getElementById(type + 'Input');
+        if (!input.value) return;
+        
+        const data = JSON.parse(localStorage.getItem(type) || '[]');
+        data.push(input.value);
+        localStorage.setItem(type, JSON.stringify(data));
+        
+        input.value = '';
+        render(type);
+    }
+
+    function deleteData(type, index) {
+        const data = JSON.parse(localStorage.getItem(type));
+        data.splice(index, 1);
+        localStorage.setItem(type, JSON.stringify(data));
+        render(type);
+    }
+
+    function render(type) {
+        const list = document.getElementById(type + 'List');
+        const data = JSON.parse(localStorage.getItem(type) || '[]');
+        list.innerHTML = data.map((item, i) => `
+            <li class="${type === 'event' ? 'event-item' : ''}">
+                <span>${item}</span>
+                <button class="del-btn" onclick="deleteData('${type}', ${i})">刪除</button>
+            </li>
+        `).join('');
+    }
+</script>
+
+</body>
+</html>
